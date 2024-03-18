@@ -1,0 +1,24 @@
+stages:
+  - build-image
+  - publish-image
+  - deploy-app
+
+build-image:
+  stage: build-image
+  script:
+    - docker build -t kleinmb3446/tp:latest .
+
+publish-image:
+  stage: publish-image
+  script:
+    - docker push kleinmb3446/tp:latest
+
+deploy-app:
+  stage: deploy-app
+  tags:
+    - ssh
+  script:
+    - echo "Deploying application to dev-srv..."
+    - ssh klein@192.168.70.152 'mkdir -p /home/klein/tp'
+    - scp -r http://192.168.70.150/root/tp/-/tree/e9f56644027f89af02e83921fc4dc377040a429f klein@192.168.70.152:/home/klein/tp
+    - ssh klein@192.168.70.152 'cd /home/klein/tp && python3 app.py &'
